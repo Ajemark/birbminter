@@ -3,7 +3,7 @@ import { TonConnectUIProvider } from "@tonconnect/ui-react";
 import React from "react";
 import { IndexPage } from "./components/IndexPage/IndexPage";
 
-export function App() {
+export default function App() {
   return (
     <TonConnectUIProvider
       manifestUrl="https://minter.ton.org/tonconnect-manifest.json"
