@@ -22,17 +22,7 @@ export function useNFTContract() {
     return client.open(contract) as OpenedContract<NftMinter>;
   }, [client]);
 
-  // const { data, isFetching } = useQuery(
-  //   ["counter"],
-  //   async () => {
-  //     if (!minterContract) return null;
-  //     return (await minterContract!.getCounter()).toString();
-  //   },
-  //   { refetchInterval: 3000 }
-  // );
-
   return {
-    // value: isFetching ? null : data,
     address: minterContract?.address.toString(),
     sendMintNft: (data: any) => {
       const message: MintNft = {
