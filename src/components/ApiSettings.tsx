@@ -12,7 +12,7 @@ export function ApiSettings() {
   //   'https://mainnet.tonhubapi.com/jsonRPC'
   // )
 
-  const [isTestnet, setTestnet] = useLocalStorage("deployerIsTestnet", "false");
+  const [isTestnet, setTestnet] = useLocalStorage("deployerIsTestnet", "true");
 
   const tonClient = useTonClient();
 
