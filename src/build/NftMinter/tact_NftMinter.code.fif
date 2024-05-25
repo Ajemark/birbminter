@@ -12,10 +12,12 @@ PROGRAM{
   DECLPROC $DeployOk$_store
   DECLPROC $DeployOk$_store_cell
   DECLPROC $MintNft$_load
+  DECLPROC $ChangeCollectionOwner$_load
   DECLPROC $NftMinter$_store
   DECLPROC $NftMinter$_load
   DECLPROC $StateInit$_not_null
   DECLPROC $Context$_get_value
+  DECLPROC $NftMinter$init$_load
   DECLPROC $NftMinter$_contract_init
   DECLPROC $NftMinter$_contract_load
   DECLPROC $NftMinter$_contract_store
@@ -32,7 +34,7 @@ PROGRAM{
   DECLPROC $NftMinter$_internal_text_a2f43c647fca1834ba717617790fa8ce6fe6ee0cb77d0b3ef0a89a93b33176f2
   DECLPROC $NftMinter$_internal_text_b10e7c1a8d0e32d543f35599087435afe57d4d6f470f2d2aa9cae4e8c9648cae
   DECLPROC $NftMinter$_internal_text_beb2935a82089b154d32f99c4377aa960aa115366cc2c602755e36b97f505cec
-  DECLPROC $NftMinter$_internal_text_449f09b99261f64066094f13d6dc5978d0d6935695b98d3bf364be8695e9b0d3
+  DECLPROC $NftMinter$_internal_binary_ChangeCollectionOwner
   DECLPROC $NftMinter$_internal_binary_Deploy
   104128 DECLMETHOD %balance
   113617 DECLMETHOD supported_interfaces
@@ -125,16 +127,31 @@ PROGRAM{
     __tact_load_address INLINECALLDICT
     s3 s3 s0 XCHG3
   }>
-  $NftMinter$_store PROCINLINE:<{
+  $ChangeCollectionOwner$_load PROCINLINE:<{
+    32 LDU
+    SWAP
+    1158906450 PUSHINT
+    EQUAL
+    129 THROWIFNOT
+    __tact_load_address INLINECALLDICT
+    SWAP
+    LDREF
     -ROT
+  }>
+  $NftMinter$_store PROCINLINE:<{
+    2SWAP
+    __tact_store_address INLINECALLDICT
+    ROT
     __tact_store_address INLINECALLDICT
     1 STI
   }>
   $NftMinter$_load PROCINLINE:<{
     __tact_load_address INLINECALLDICT
     SWAP
+    __tact_load_address INLINECALLDICT
+    SWAP
     1 LDI
-    -ROT
+    3 -ROLL
   }>
   $StateInit$_not_null PROCINLINE:<{
     DUP
@@ -146,8 +163,12 @@ PROGRAM{
     s1 s3 XCHG
     3 BLKDROP
   }>
+  $NftMinter$init$_load PROCINLINE:<{
+    __tact_load_address INLINECALLDICT
+  }>
   $NftMinter$_contract_init PROCREF:<{
     __tact_context_get_sender INLINECALLDICT
+    SWAP
     TRUE
   }>
   $NftMinter$_contract_load PROCREF:<{
@@ -160,14 +181,16 @@ PROGRAM{
     SWAP
     IFJMP:<{
       $NftMinter$_load INLINECALLDICT
-      1 2 BLKDROP2
+      1 3 BLKDROP2
     }>
-    DROP
     MYADDR
     11 PLDU
     10 PUSHPOW2
     EQUAL
     137 THROWIFNOT
+    $NftMinter$init$_load INLINECALLDICT
+    SWAP
+    ENDS
     $NftMinter$_contract_init INLINECALLDICT
   }>
   $NftMinter$_contract_store PROCINLINE:<{
@@ -178,7 +201,7 @@ PROGRAM{
     TRUE
     SWAP
     1 STI
-    -ROT
+    3 -ROLL
     $NftMinter$_store INLINECALLDICT
     ENDC
     c4 POP
@@ -294,6 +317,19 @@ PROGRAM{
     PUSHNULL
   }>
   $NftMinter$_fun_mint PROCREF:<{
+    __tact_context_get_sender INLINECALLDICT
+    s5 s(-1) PUXC
+    __tact_slice_eq_bits INLINECALLDICT
+    IFJMP:<{
+      50000000 PUSHINT
+      s2 POP
+      2 PUSHINT
+      s0 s3 XCHG2
+      TRUE
+      SWAP
+      $SendParameters$_constructor_to_value_mode_bounce_body INLINECALLDICT
+      $global_send INLINECALLDICT
+    }>
     50195 PUSHINT
     __tact_context_get INLINECALLDICT
     $Context$_get_value INLINECALLDICT
@@ -368,7 +404,7 @@ PROGRAM{
     DROP
     50576 PUSHINT
     __tact_context_get_sender INLINECALLDICT
-    s2 s(-1) PUXC
+    s3 s(-1) PUXC
     __tact_slice_eq_bits INLINECALLDICT
     THROWANYIFNOT
     FALSE
@@ -377,7 +413,7 @@ PROGRAM{
     DROP
     50576 PUSHINT
     __tact_context_get_sender INLINECALLDICT
-    s2 s(-1) PUXC
+    s3 s(-1) PUXC
     __tact_slice_eq_bits INLINECALLDICT
     THROWANYIFNOT
     TRUE
@@ -385,7 +421,7 @@ PROGRAM{
   $NftMinter$_internal_text_beb2935a82089b154d32f99c4377aa960aa115366cc2c602755e36b97f505cec PROCINLINE:<{
     15509 PUSHINT
     __tact_context_get_sender INLINECALLDICT
-    s3 s(-1) PUXC
+    s4 s(-1) PUXC
     __tact_slice_eq_bits INLINECALLDICT
     THROWANYIFNOT
     __tact_context_get_sender INLINECALLDICT
@@ -400,15 +436,19 @@ PROGRAM{
     $SendParameters$_constructor_to_bounce_value_mode INLINECALLDICT
     $global_send INLINECALLDICT
   }>
-  $NftMinter$_internal_text_449f09b99261f64066094f13d6dc5978d0d6935695b98d3bf364be8695e9b0d3 PROCINLINE:<{
-    36877 PUSHINT
+  $NftMinter$_internal_binary_ChangeCollectionOwner PROCINLINE:<{
+    49699 PUSHINT
     __tact_context_get_sender INLINECALLDICT
-    s1 s3 XCHG
+    s6 s(-1) PUXC
     __tact_slice_eq_bits INLINECALLDICT
-    s1 s2 XCHG
     THROWANYIFNOT
-    __tact_context_get_sender INLINECALLDICT
+    50000000 PUSHINT
+    2 PUSHINT
+    ROT
+    TRUE
     SWAP
+    $SendParameters$_constructor_to_value_mode_bounce_body INLINECALLDICT
+    $global_send INLINECALLDICT
   }>
   $NftMinter$_internal_binary_Deploy PROCINLINE:<{
     $DeployOk$_constructor_queryId INLINECALLDICT
@@ -418,7 +458,7 @@ PROGRAM{
   %balance PROC:<{
     $NftMinter$_contract_load INLINECALLDICT
     $NftMinter$_fun_balance INLINECALLDICT
-    2 1 BLKDROP2
+    3 1 BLKDROP2
   }>
   supported_interfaces PROC:<{
     123515602279859691144772641439386770278 PUSHINT
@@ -427,7 +467,7 @@ PROGRAM{
     209474421377847335869795010607481022628 PUSHINT
   }>
   get_abi_ipfs PROC:<{
-    x{697066733a2f2f516d5456537872336375374a7557327976745533566a5865326a41793142366b6833784c64447a54536f73536236} PUSHSLICE
+    x{697066733a2f2f516d5261655352385a3631416e5559375a4a734e77634e4e7a7a557875414e416b535759786151396d6670723977} PUSHSLICE
   }>
   lazy_deployment_completed PROC:<{
     c4 PUSH
@@ -463,6 +503,16 @@ PROGRAM{
       TRUE
     }>
     DUP
+    1158906450 PUSHINT
+    EQUAL
+    IFJMP:<{
+      DROP
+      $ChangeCollectionOwner$_load INLINECALLDICT
+      1 2 BLKDROP2
+      $NftMinter$_internal_binary_ChangeCollectionOwner INLINECALLDICT
+      TRUE
+    }>
+    DUP
     2490013878 PUSHINT
     EQUAL
     IFJMP:<{
@@ -493,19 +543,10 @@ PROGRAM{
         TRUE
         RETALT
       }>
-      DUP
       86254957005153482593167742035089344693437782575091241529406133056369733950700 PUSHINT
       EQUAL
       IFJMP:<{
-        DROP
         $NftMinter$_internal_text_beb2935a82089b154d32f99c4377aa960aa115366cc2c602755e36b97f505cec INLINECALLDICT
-        TRUE
-        RETALT
-      }>
-      31038269505685025835851947740364193563856620210042755684214021156224830648531 PUSHINT
-      EQUAL
-      IFJMP:<{
-        $NftMinter$_internal_text_449f09b99261f64066094f13d6dc5978d0d6935695b98d3bf364be8695e9b0d3 INLINECALLDICT
         TRUE
         RETALT
       }>
@@ -533,7 +574,7 @@ PROGRAM{
     s0 s2 XCHG
     __tact_context_sender SETGLOB
     $NftMinter$_contract_load INLINECALLDICT
-    2SWAP
+    2 3 BLKSWAP
     $NftMinter$_contract_router_internal INLINECALLDICT
     130 THROWIFNOT
     $NftMinter$_contract_store INLINECALLDICT

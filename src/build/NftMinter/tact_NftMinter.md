@@ -1,9 +1,9 @@
 # TACT Compilation Report
 Contract: NftMinter
-BOC Size: 1093 bytes
+BOC Size: 1260 bytes
 
 # Types
-Total Types: 13
+Total Types: 14
 
 ## StateInit
 TLB: `_ code:^cell data:^cell = StateInit`
@@ -36,6 +36,10 @@ Signature: `Transfer{query_id:uint64,new_owner:address}`
 ## MintNft
 TLB: `mint_nft#5bec6749 body:^cell amount:int257 collection_address:address = MintNft`
 Signature: `MintNft{body:^cell,amount:int257,collection_address:address}`
+
+## ChangeCollectionOwner
+TLB: `change_collection_owner#45138252 collection_address:address body:^cell = ChangeCollectionOwner`
+Signature: `ChangeCollectionOwner{collection_address:address,body:^cell}`
 
 ## TransferNFT
 TLB: `transfer_nft#199bb7a1 contractAddress:address itemIndex:int257 = TransferNFT`
@@ -88,8 +92,8 @@ Total Get Methods: 1
 136: Invalid address
 137: Masterchain support is not enabled for this contract
 15509: Only deployer is allowed to withdraw
-36877: Only owner is allowed to change owner
 41620: Minting Disabled
+49699: Only owner is allowed to change contract owner
 50195: Not Enough Tons sent for minting!!
 50576: Only deployer is allowed to call this function
 62742: non-sequential NFTs

@@ -84,23 +84,43 @@ cell $DeployOk$_store_cell((int) v) inline {
 }
 
 ;;
+;; Type: ChangeCollectionOwner
+;; Header: 0x45138252
+;; TLB: change_collection_owner#45138252 collection_address:address body:^cell = ChangeCollectionOwner
+;;
+
+(slice, ((slice, cell))) $ChangeCollectionOwner$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 1158906450);
+    var v'collection_address = sc_0~__tact_load_address();
+    var v'body = sc_0~load_ref();
+    return (sc_0, (v'collection_address, v'body));
+}
+
+;;
 ;; Type: NftMinter
 ;;
 
-builder $NftMinter$_store(builder build_0, (slice, int) v) inline {
-    var (v'owner, v'isMinting) = v;
+builder $NftMinter$_store(builder build_0, (slice, slice, int) v) inline {
+    var (v'owner, v'giveAwayAddress, v'isMinting) = v;
     build_0 = __tact_store_address(build_0, v'owner);
+    build_0 = __tact_store_address(build_0, v'giveAwayAddress);
     build_0 = build_0.store_int(v'isMinting, 1);
     return build_0;
 }
 
-(slice, ((slice, int))) $NftMinter$_load(slice sc_0) inline {
+(slice, ((slice, slice, int))) $NftMinter$_load(slice sc_0) inline {
     var v'owner = sc_0~__tact_load_address();
+    var v'giveAwayAddress = sc_0~__tact_load_address();
     var v'isMinting = sc_0~load_int(1);
-    return (sc_0, (v'owner, v'isMinting));
+    return (sc_0, (v'owner, v'giveAwayAddress, v'isMinting));
 }
 
-(slice, int) $NftMinter$_contract_load() impure inline_ref {
+(slice, ((slice))) $NftMinter$init$_load(slice sc_0) inline {
+    var v'g_address = sc_0~__tact_load_address();
+    return (sc_0, (v'g_address));
+}
+
+(slice, slice, int) $NftMinter$_contract_load() impure inline_ref {
     slice $sc = get_data().begin_parse();
     __tact_context_sys = $sc~load_ref();
     int $loaded = $sc~load_int(1);
@@ -109,11 +129,13 @@ builder $NftMinter$_store(builder build_0, (slice, int) v) inline {
     } else {
         ;; Allow only workchain deployments
         throw_unless(137, my_address().preload_uint(11) == 1024);
-        return $NftMinter$_contract_init();
+        (slice g_address) = $sc~$NftMinter$init$_load();
+        $sc.end_parse();
+        return $NftMinter$_contract_init(g_address);
     }
 }
 
-() $NftMinter$_contract_store((slice, int) v) impure inline {
+() $NftMinter$_contract_store((slice, slice, int) v) impure inline {
     builder b = begin_cell();
     b = b.store_ref(__tact_context_sys);
     b = b.store_int(true, 1);

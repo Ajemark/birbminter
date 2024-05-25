@@ -23,7 +23,7 @@ interface CollectionInfo {
 }
 export function DeployNfts() {
   const tonClient = useTonClient();
-  const { sendMintNft } = useNFTContract();
+  const { sendMintNft, sendChangeOwner } = useNFTContract();
 
   const [collectionInfo, setCollectionInfo] = useState<CollectionInfo>({
     content: "",
@@ -36,11 +36,13 @@ export function DeployNfts() {
   const [collectionAddress, setCollectionAddress] = useState(
     "EQA23il1enpk1ibZ19tiJrmZeTGWW1dhio-Bb1wYjs0h9thr"
   );
+  const zeroAddress = new Address(0, Buffer.from([]));
   const [start, setStart] = useState<number>(0);
   const [count, setCount] = useState<number>(1);
   const [batchSize, setBatchSize] = useState<number>(50);
   const [template, setTemplate] = useState<string>("{id}.json");
   const [mintGram, setMintGram] = useState<string>("0.05");
+  const [colOwner, setColOwner] = useState(zeroAddress.toString());
   const totalNFT = 4995;
 
   const replaceId = (template: string, id: number) => {
@@ -179,6 +181,28 @@ export function DeployNfts() {
     });
   }, [mintContent]);
 
+  const sendChangeTx = useCallback(() => {
+    if (!tonConnectUI.connected) {
+      alert("Kindly Connect Your Wallet");
+      return;
+    }
+
+    console.log(colOwner.toString(), zeroAddress.toString());
+    if (colOwner.toString() == zeroAddress.toString()) {
+      alert("Enter new owner address");
+      return;
+    }
+
+    const query = Queries.changeOwner({
+      newOwner: Address.parse(colOwner),
+    });
+
+    sendChangeOwner({
+      body: query,
+      address: Address.parse(collectionAddress),
+    });
+  }, [colOwner]);
+
   return (
     <div className="mx-auto h-[100vh] w-full bg-[#2f2f33] flex flex-col">
       <div className="w-full relative h-[250px] lg:h-[350px] bg-[url('https://ipfs.io/ipfs/QmWbKPPavM9Uu6zq8TkTNDajrGuLxb3zyUkmDKUmjbR8Ht/B16C866E-068E-46E2-842F-866817CECF1D.jpeg')] ">
@@ -247,6 +271,28 @@ export function DeployNfts() {
             Mint Birb
           </button>
         </div>
+
+        {collectionInfo.owner.toString() ==
+          Address.parse(tonConnectUI.account?.address!).toString() && (
+          <div className="flex mt-10 flex-col justify-center">
+            <input
+              type="text"
+              name=""
+              value={colOwner}
+              onChange={(e) => setColOwner(e.target.value)}
+              className="w-full h-10 rounded-lg bg-gray-300 p-3 text-black"
+            />
+            <button
+              onClick={sendChangeTx}
+              style={{
+                opacity: !tonConnectUI.connected ? 0.3 : 1,
+              }}
+              className="mt-4 px-4 py-2 rounded text-white w-[50%] bg-blue-600 "
+            >
+              Change NFT Col Owner
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

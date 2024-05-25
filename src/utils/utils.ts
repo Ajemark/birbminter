@@ -29,3 +29,14 @@ export const Mint = (params: {
 
   return msgBody.endCell();
 };
+
+export const changeOwner = (params: {
+  queryId?: number;
+  newOwner: Address;
+}) => {
+  const msgBody = beginCell();
+  msgBody.storeUint(3, 32);
+  msgBody.storeUint(params.queryId || 0, 64);
+  msgBody.storeAddress(params.newOwner);
+  return msgBody.endCell();
+};

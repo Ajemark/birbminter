@@ -1,9 +1,13 @@
 import { useTonClient } from "./useTonClient";
 import { useAsyncInitialize } from "./useAsyncInitialize";
 import { useTonConnect } from "./useTonConnect";
-import { Address, OpenedContract } from "ton-core";
+import { Address, OpenedContract, toNano } from "ton-core";
 import { CHAIN } from "@tonconnect/protocol";
-import { MintNft, NftMinter } from "../wrappers/NftMinter";
+import {
+  ChangeCollectionOwner,
+  MintNft,
+  NftMinter,
+} from "../wrappers/NftMinter";
 
 export function useNFTContract() {
   const { client } = useTonClient();
@@ -14,12 +18,13 @@ export function useNFTContract() {
     const contract = new NftMinter(
       Address.parse(
         network === CHAIN.MAINNET
-          ? "EQATBr6L5eDWA6w7Lj85ebYqDa1nJnL2UJZ-xoH0wk6WbPfB"
-          : "EQBVa1c5fEf02D1DUxjoIVJtzy7gMznyaiteVN8nCbEFFwce"
+          ? "EQCrapCQJNp5yySehDBOaRqx6OumZLBZMJPGhLuCy2_ymwjt"
+          : "kQDkj6cv-MWCEflGL937yR3cxT-v0eST4ljyLoba_YSO_mLM"
       )
     );
     return client.open(contract) as OpenedContract<NftMinter>;
   }, [client]);
+  // : "EQBVa1c5fEf02D1DUxjoIVJtzy7gMznyaiteVN8nCbEFFwce"
 
   return {
     address: minterContract?.address.toString(),
@@ -32,6 +37,14 @@ export function useNFTContract() {
         collection_address: data.address,
       };
       return minterContract?.send(sender, { value: data.value }, message);
+    },
+    sendChangeOwner: (data: any) => {
+      const message: ChangeCollectionOwner = {
+        $$type: "ChangeCollectionOwner",
+        body: data.body,
+        collection_address: data.address,
+      };
+      return minterContract?.send(sender, { value: toNano("0.05") }, message);
     },
   };
 }
