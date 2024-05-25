@@ -272,27 +272,28 @@ export function DeployNfts() {
           </button>
         </div>
 
-        {collectionInfo.owner.toString() ==
-          Address.parse(tonConnectUI.account?.address!).toString() && (
-          <div className="flex mt-10 flex-col justify-center">
-            <input
-              type="text"
-              name=""
-              value={colOwner}
-              onChange={(e) => setColOwner(e.target.value)}
-              className="w-full h-10 rounded-lg bg-gray-300 p-3 text-black"
-            />
-            <button
-              onClick={sendChangeTx}
-              style={{
-                opacity: !tonConnectUI.connected ? 0.3 : 1,
-              }}
-              className="mt-4 px-4 py-2 rounded text-white w-[50%] bg-blue-600 "
-            >
-              Change NFT Col Owner
-            </button>
-          </div>
-        )}
+        {tonConnectUI.account &&
+          collectionInfo.owner.toString() ==
+            Address.parse(tonConnectUI.account?.address!).toString() && (
+            <div className="flex mt-10 flex-col justify-center">
+              <input
+                type="text"
+                name=""
+                value={colOwner}
+                onChange={(e) => setColOwner(e.target.value)}
+                className="w-full h-10 rounded-lg bg-gray-300 p-3 text-black"
+              />
+              <button
+                onClick={sendChangeTx}
+                style={{
+                  opacity: !tonConnectUI.connected ? 0.3 : 1,
+                }}
+                className="mt-4 px-4 py-2 rounded text-white w-[50%] bg-blue-600 "
+              >
+                Change NFT Col Owner
+              </button>
+            </div>
+          )}
       </div>
     </div>
   );
