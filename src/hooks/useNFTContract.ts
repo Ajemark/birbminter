@@ -24,7 +24,7 @@ export function useNFTContract() {
   return {
     address: minterContract?.address.toString(),
     sendMintNft: (data: any) => {
-      console.log(data);
+      // console.log(data);
       const message: MintNft = {
         $$type: "MintNft",
         body: data.body,

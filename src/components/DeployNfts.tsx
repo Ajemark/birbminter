@@ -69,7 +69,6 @@ export function DeployNfts() {
       "get_collection_data"
     );
 
-    console.log(contentInfo);
     const [nextItemIndex, collectionContent, collectionOwner] = [
       contentInfo.stack.pop(),
       contentInfo.stack.pop(),
