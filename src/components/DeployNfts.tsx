@@ -43,6 +43,7 @@ export function DeployNfts() {
   const [template, setTemplate] = useState<string>("{id}.json");
   const [mintGram, setMintGram] = useState<string>("0.05");
   const [colOwner, setColOwner] = useState(zeroAddress.toString());
+  const [error, setError] = useState("");
   const totalNFT = 4995;
 
   const replaceId = (template: string, id: number) => {
@@ -163,13 +164,23 @@ export function DeployNfts() {
     mintGram,
   ]);
 
+  useEffect(() => {
+    if (error == "") return;
+    setTimeout(() => {
+      setError("");
+    }, 4000);
+  }, [error]);
+
   const sendTx = useCallback(() => {
-    if (count < 1) {
-      alert("Kindly Enter number of nft to mint");
+    // console.log("first");
+    setError("");
+    if (count < 0) {
+      setError("Kindly Enter number of nft to mint");
       return;
     }
+
     if (!tonConnectUI.connected) {
-      alert("Kindly Connect Your Wallet");
+      setError("Kindly Connect Your Wallet");
       return;
     }
 
@@ -182,14 +193,16 @@ export function DeployNfts() {
   }, [mintContent]);
 
   const sendChangeTx = useCallback(() => {
+    console.log("first");
+    setError("");
     if (!tonConnectUI.connected) {
-      alert("Kindly Connect Your Wallet");
+      setError("Kindly Connect Your Wallet");
       return;
     }
 
     console.log(colOwner.toString(), zeroAddress.toString());
     if (colOwner.toString() == zeroAddress.toString()) {
-      alert("Enter new owner address");
+      setError("Enter new owner address");
       return;
     }
 
@@ -205,6 +218,18 @@ export function DeployNfts() {
 
   return (
     <div className="mx-auto h-[100vh] w-full bg-[#2f2f33] flex flex-col">
+      {error != "" && (
+        <div className="fixed z-[99999999999999]  top-[calc(50%)] left-0 w-[100vw] h-[100vh]">
+          <div
+            className="p-4 mb-4 text-center mx-auto w-[80%] text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400"
+            role="alert"
+          >
+            <span className="font-medium text-xl">Danger Alert!</span> <br />{" "}
+            {error}
+          </div>
+        </div>
+      )}
+
       <div className="w-full relative h-[250px] lg:h-[350px] bg-[url('https://ipfs.io/ipfs/QmWbKPPavM9Uu6zq8TkTNDajrGuLxb3zyUkmDKUmjbR8Ht/B16C866E-068E-46E2-842F-866817CECF1D.jpeg')] ">
         <div className="bg-[rgba(0,0,0,0.4)] absolute top-0 left-0 w-full h-full"></div>
       </div>
@@ -255,14 +280,12 @@ export function DeployNfts() {
 
         <div className="flex justify-center">
           <button
-            disabled={
-              Number(collectionInfo.nextItemIndex) < 0 && tonConnectUI.connected
-            }
+            disabled={Number(collectionInfo.nextItemIndex) < 0}
             onClick={sendTx}
             style={{
               opacity:
                 Number(collectionInfo.nextItemIndex) < 0 &&
-                tonConnectUI.connected
+                !tonConnectUI.connected
                   ? 0.3
                   : 1,
             }}
