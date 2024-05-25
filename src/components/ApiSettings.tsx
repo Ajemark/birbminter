@@ -12,14 +12,14 @@ export function ApiSettings() {
   //   'https://mainnet.tonhubapi.com/jsonRPC'
   // )
 
-  const [isTestnet, setTestnet] = useLocalStorage("deployerIsTestnet", "true");
+  const [isTestnet, setTestnet] = useLocalStorage("deployerIsTestnet", "false");
 
   const tonClient = useTonClient();
 
   useEffect(() => {
     // console.log("change network");
     getHttpEndpoint({
-      network: isTestnet === "true" ? "testnet" : "mainnet",
+      network: "mainnet",
     }).then((endpoint) => {
       tonClient.set(
         new TonClient({

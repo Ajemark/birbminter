@@ -18,7 +18,7 @@ interface CollectionInfo {
   content: string;
   base: string;
   owner: Address;
-  nftEditable: boolean;
+  // nftEditable: boolean;
   nextItemIndex: string;
 }
 export function DeployNfts() {
@@ -29,19 +29,19 @@ export function DeployNfts() {
     content: "",
     base: "",
     owner: new Address(0, Buffer.from([])),
-    nftEditable: false,
+    // nftEditable: false,
     nextItemIndex: "1",
   });
 
   const [collectionAddress, setCollectionAddress] = useState(
-    "EQD4EBP3ydCXr57EcxaHvAXGQBIGcGlxfKUkUU6g7s10uqep"
+    "EQA23il1enpk1ibZ19tiJrmZeTGWW1dhio-Bb1wYjs0h9thr"
   );
   const [start, setStart] = useState<number>(0);
   const [count, setCount] = useState<number>(1);
   const [batchSize, setBatchSize] = useState<number>(50);
   const [template, setTemplate] = useState<string>("{id}.json");
   const [mintGram, setMintGram] = useState<string>("0.05");
-  const totalNFT = 95;
+  const totalNFT = 4995;
 
   const replaceId = (template: string, id: number) => {
     return template.replace(/{id}/g, id.toString());
@@ -52,7 +52,7 @@ export function DeployNfts() {
       content: "",
       base: "",
       owner: new Address(0, Buffer.from([])),
-      nftEditable: false,
+      // nftEditable: false,
       nextItemIndex: "-1",
     });
 
@@ -68,6 +68,8 @@ export function DeployNfts() {
       address,
       "get_collection_data"
     );
+
+    console.log(contentInfo);
     const [nextItemIndex, collectionContent, collectionOwner] = [
       contentInfo.stack.pop(),
       contentInfo.stack.pop(),
@@ -99,9 +101,9 @@ export function DeployNfts() {
       content,
       base: baseContent,
       owner: collectionOwner.cell.asSlice().loadAddress(),
-      nftEditable: isNftCollectionNftEditable(
-        Cell.fromBoc(account.data || Buffer.from([]))[0]
-      ),
+      // nftEditable: isNftCollectionNftEditable(
+      //   Cell.fromBoc(account.data || Buffer.from([]))[0]
+      // ),
     });
     setStart(Number(nextItemIndex.value));
   };
@@ -137,34 +139,16 @@ export function DeployNfts() {
       const nftIds = ids.splice(0, batchSize);
       // console.log("nftIds len", nftIds.length);
 
-      return collectionInfo.nftEditable
-        ? Queries.batchMintEditable({
-            items: nftIds.map((i) => {
-              return {
-                passAmount: toNano(mintGram),
-                content: replaceId(template || "", i),
-                index: i,
-                ownerAddress: Address.parse(
-                  tonConnectUI.account?.address || ""
-                ),
-                editorAddress: Address.parse(
-                  tonConnectUI.account?.address || ""
-                ),
-              };
-            }),
-          })
-        : Queries.batchMint({
-            items: nftIds.map((i) => {
-              return {
-                passAmount: toNano(mintGram),
-                content: replaceId(template || "", i),
-                index: i,
-                ownerAddress: Address.parse(
-                  tonConnectUI.account?.address || ""
-                ),
-              };
-            }),
-          });
+      return Queries.batchMint({
+        items: nftIds.map((i) => {
+          return {
+            passAmount: toNano(mintGram),
+            content: replaceId(template || "", i),
+            index: i,
+            ownerAddress: Address.parse(tonConnectUI.account?.address || ""),
+          };
+        }),
+      });
     }
 
     return messages;
@@ -192,9 +176,7 @@ export function DeployNfts() {
       body: mintContent,
       amount: count,
       value: toNano("0.05") * BigInt(count) + toNano((6 * count).toString()),
-      address: Address.parse(
-        "EQD4EBP3ydCXr57EcxaHvAXGQBIGcGlxfKUkUU6g7s10uqep"
-      ),
+      address: Address.parse(collectionAddress),
     });
   }, [mintContent]);
 

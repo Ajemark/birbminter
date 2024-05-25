@@ -14,7 +14,7 @@ export function useNFTContract() {
     const contract = new NftMinter(
       Address.parse(
         network === CHAIN.MAINNET
-          ? "EQA23il1enpk1ibZ19tiJrmZeTGWW1dhio-Bb1wYjs0h9thr"
+          ? "EQATBr6L5eDWA6w7Lj85ebYqDa1nJnL2UJZ-xoH0wk6WbPfB"
           : "EQBVa1c5fEf02D1DUxjoIVJtzy7gMznyaiteVN8nCbEFFwce"
       )
     );
