@@ -17,7 +17,7 @@ export function ApiSettings() {
   const tonClient = useTonClient();
 
   useEffect(() => {
-    console.log("change network");
+    // console.log("change network");
     getHttpEndpoint({
       network: isTestnet === "true" ? "testnet" : "mainnet",
     }).then((endpoint) => {
@@ -40,8 +40,10 @@ export function ApiSettings() {
 
   return (
     <div className="my-2">
-      <div>
-        <label htmlFor="apiTestnetInput">Is Testnet:</label>
+      {/* <div>
+        <label className="text-gray-300" htmlFor="apiTestnetInput ">
+          Is Testnet:
+        </label>
         <input
           className="ml-2 bg-gray-200 rounded"
           type="checkbox"
@@ -49,7 +51,7 @@ export function ApiSettings() {
           checked={isTestnet === "true"}
           onChange={(e) => setTestnet(String(e.target.checked))}
         />
-      </div>
+      </div> */}
       {/* <div>
         <label htmlFor="apiEndpointInput">API Endpoint:</label>
         <div className="text-sm text-gray-500 my-1">

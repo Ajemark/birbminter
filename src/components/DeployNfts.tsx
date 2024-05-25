@@ -28,20 +28,20 @@ export function DeployNfts() {
   const [collectionInfo, setCollectionInfo] = useState<CollectionInfo>({
     content: "",
     base: "",
-
     owner: new Address(0, Buffer.from([])),
     nftEditable: false,
-    nextItemIndex: "-1",
+    nextItemIndex: "1",
   });
 
   const [collectionAddress, setCollectionAddress] = useState(
-    "kQC-1FqrPMzrppHUqRDx5TFvfyNDUD4gdSy15YkG8c8GIYST"
+    "EQD4EBP3ydCXr57EcxaHvAXGQBIGcGlxfKUkUU6g7s10uqep"
   );
   const [start, setStart] = useState<number>(0);
   const [count, setCount] = useState<number>(1);
   const [batchSize, setBatchSize] = useState<number>(50);
   const [template, setTemplate] = useState<string>("{id}.json");
   const [mintGram, setMintGram] = useState<string>("0.05");
+  const totalNFT = 95;
 
   const replaceId = (template: string, id: number) => {
     return template.replace(/{id}/g, id.toString());
@@ -63,7 +63,6 @@ export function DeployNfts() {
       return;
     }
     const account = await tonClient.value.getContractState(address);
-    const info = await tonClient.value.callGetMethod(address, "royalty_params");
 
     const contentInfo = await tonClient.value.callGetMethod(
       address,
@@ -133,6 +132,7 @@ export function DeployNfts() {
     }[] = [];
 
     const ids = [...Array(count)].map((_, i) => start + i);
+
     while (ids.length > 0) {
       const nftIds = ids.splice(0, batchSize);
       // console.log("nftIds len", nftIds.length);
@@ -179,99 +179,91 @@ export function DeployNfts() {
   ]);
 
   const sendTx = useCallback(() => {
-    sendMintNft(mintContent);
+    if (count < 1) {
+      alert("Kindly Enter number of nft to mint");
+      return;
+    }
+    if (!tonConnectUI.connected) {
+      alert("Kindly Connect Your Wallet");
+      return;
+    }
+
+    sendMintNft({
+      body: mintContent,
+      amount: count,
+      value: toNano("0.05") * BigInt(count) + toNano((6 * count).toString()),
+      address: Address.parse(
+        "EQD4EBP3ydCXr57EcxaHvAXGQBIGcGlxfKUkUU6g7s10uqep"
+      ),
+    });
   }, [mintContent]);
 
   return (
-    <div className="container mx-auto gap-2 p-5 flex flex-col">
-      <div className="flex justify-end flex-col items-end">
-        <TonConnectButton />
-        <ApiSettings />
+    <div className="mx-auto h-[100vh] w-full bg-[#2f2f33] flex flex-col">
+      <div className="w-full relative h-[250px] lg:h-[350px] bg-[url('https://ipfs.io/ipfs/QmWbKPPavM9Uu6zq8TkTNDajrGuLxb3zyUkmDKUmjbR8Ht/B16C866E-068E-46E2-842F-866817CECF1D.jpeg')] ">
+        <div className="bg-[rgba(0,0,0,0.4)] absolute top-0 left-0 w-full h-full"></div>
+      </div>
+      <div className="lg:mt-[-180px] mt-[-110px] max-w-2xl justify-between w-full mx-auto items-center flex p-10 z-40">
+        <img
+          className="w-[100px] h-[100px] lg:w-[200px] lg:h-[200px] rounded-xl"
+          src="https://ipfs.io/ipfs/QmcSQadxGMin8VuZGBVUTSykLTsiNnoacgv2UnNkgjMt38/IMG_8168.jpeg"
+        />
+        <div className="flex justify-end flex-col items-end   lg:mt-[-150px]  ">
+          <TonConnectButton />
+          <ApiSettings />
+        </div>
       </div>
 
-      <div className="w-[70%] mx-auto">
-        <h2 className="text-lg text-center font-bold mb-4">Mint Birb Nft</h2>
-        <div className="">
-          <div>
-            <label htmlFor="collectionAddress">Collection Address:</label>
-            <input
-              disabled
-              className="w-full px-2 py-2 bg-gray-200 rounded"
-              type="text"
-              id="collectionAddress"
-              value={collectionAddress}
-              onChange={(e) => setCollectionAddress(e.target.value)}
-            />
+      <div className="w-[70%] max-w-2xl mt-[30px] text-white mx-auto">
+        <h2 className="text-lg text-center uppercase font-bold mb-4">
+          Mint Birb Nfts
+        </h2>
+
+        <div className="bg-gray-700 p-5 rounded-xl">
+          <div className="flex justify-between ">
+            <p>Total NFT </p> <p>{totalNFT}</p>
           </div>
+          <div className="bg-[#2f2f33] my-3">
+            <div
+              className="h-1"
+              style={{
+                background: "#007aff",
+                width: `${(Number(collectionInfo.nextItemIndex) / totalNFT) * 100}%`,
+              }}
+            ></div>
+          </div>
+          <p className="text-gray-500 text-center">
+            Minted {collectionInfo.nextItemIndex} out of {totalNFT} NFT
+          </p>
         </div>
 
-        <div className="py-2">
-          <div>
-            <label htmlFor="collectionBase">Collection Base:</label>
-            <input
-              className="w-full px-2 py-2 bg-gray-200 rounded"
-              type="text"
-              id="collectionBase"
-              value={collectionInfo?.base}
-              readOnly
-            />
-          </div>
-
-          <div>
-            <label htmlFor="collectionIndex">Next Item Index:</label>
-            <input
-              className="w-full px-2 py-2 bg-gray-200 rounded"
-              type="text"
-              id="collectionIndex"
-              value={collectionInfo?.nextItemIndex}
-              readOnly
-            />
-          </div>
-        </div>
-
-        <h3 className="font-bold text-lg">Mint settings:</h3>
-
-        <div className="flex w-full">
-          <div className="w-full">
-            <label htmlFor="mintGram">Initial NFT Balance:</label>
-            <div className="text-sm text-gray-500">
-              0.05 is recommended for normal nfts, but you can use 0.01 for
-              testing purposes
-            </div>
-            <input
-              className="w-full px-2 py-2 bg-gray-200 rounded"
-              type="number"
-              id="mintGram"
-              value={mintGram}
-              onChange={(e) => setMintGram(e.target.value)}
-            />
-          </div>
-        </div>
-
-        <div className="flex">
-          <div>
-            <div>
-              Full url (If you click on that url, valid nft metadata should be
-              opened in your browser):{" "}
-              <a
-                href={`${collectionInfo.base}/${replaceId(template, start + count - 1)}`}
-              >
-                {replaceId(template, start + count - 1)}
-              </a>
-            </div>
-          </div>
-        </div>
+        {/* <div className="mt-5">
+          <p className="my-2">Number of NFTs to be minted</p>
+          <input
+            type="text"
+            name=""
+            value={count}
+            onChange={(e) => setCount(Number(e.target.value))}
+            className="w-full h-10 rounded-lg bg-gray-300 p-3 text-black"
+          />
+        </div> */}
 
         <div className="flex justify-center">
           <button
-            disabled={Number(collectionInfo.nextItemIndex) < 0}
+            disabled={
+              Number(collectionInfo.nextItemIndex) < 0 && tonConnectUI.connected
+            }
             onClick={sendTx}
             style={{
-              opacity: Number(collectionInfo.nextItemIndex) < 0 ? 0.3 : 1,
+              opacity:
+                Number(collectionInfo.nextItemIndex) < 0 &&
+                tonConnectUI.connected
+                  ? 0.3
+                  : 1,
             }}
             className="mt-4 px-4 py-2 rounded text-white w-[50%] bg-blue-600 "
           >
-            Send Mint Tx
+            Mint Birb
           </button>
         </div>
       </div>

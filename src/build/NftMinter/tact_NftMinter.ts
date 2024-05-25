@@ -437,33 +437,53 @@ function dictValueParserTransfer(): DictionaryValue<Transfer> {
 export type MintNft = {
   $$type: "MintNft";
   body: Cell;
+  amount: bigint;
+  collection_address: Address;
 };
 
 export function storeMintNft(src: MintNft) {
   return (builder: Builder) => {
     let b_0 = builder;
-    b_0.storeUint(2590352207, 32);
+    b_0.storeUint(1542219593, 32);
     b_0.storeRef(src.body);
+    b_0.storeInt(src.amount, 257);
+    b_0.storeAddress(src.collection_address);
   };
 }
 
 export function loadMintNft(slice: Slice) {
   let sc_0 = slice;
-  if (sc_0.loadUint(32) !== 2590352207) {
+  if (sc_0.loadUint(32) !== 1542219593) {
     throw Error("Invalid prefix");
   }
   let _body = sc_0.loadRef();
-  return { $$type: "MintNft" as const, body: _body };
+  let _amount = sc_0.loadIntBig(257);
+  let _collection_address = sc_0.loadAddress();
+  return {
+    $$type: "MintNft" as const,
+    body: _body,
+    amount: _amount,
+    collection_address: _collection_address,
+  };
 }
 
 function loadTupleMintNft(source: TupleReader) {
   let _body = source.readCell();
-  return { $$type: "MintNft" as const, body: _body };
+  let _amount = source.readBigNumber();
+  let _collection_address = source.readAddress();
+  return {
+    $$type: "MintNft" as const,
+    body: _body,
+    amount: _amount,
+    collection_address: _collection_address,
+  };
 }
 
 function storeTupleMintNft(source: MintNft) {
   let builder = new TupleBuilder();
   builder.writeCell(source.body);
+  builder.writeNumber(source.amount);
+  builder.writeAddress(source.collection_address);
   return builder.build();
 }
 
@@ -788,10 +808,10 @@ function initNftMinter_init_args(src: NftMinter_init_args) {
 
 async function NftMinter_init() {
   const __code = Cell.fromBase64(
-    "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"
+    "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"
   );
   const __system = Cell.fromBase64(
-    "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"
+    "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"
   );
   let builder = beginCell();
   builder.storeRef(__system);
@@ -827,6 +847,10 @@ const NftMinter_errors: { [key: number]: { message: string } } = {
   136: { message: `Invalid address` },
   137: { message: `Masterchain support is not enabled for this contract` },
   15509: { message: `Only deployer is allowed to withdraw` },
+  36877: { message: `Only owner is allowed to change owner` },
+  41620: { message: `Minting Disabled` },
+  50195: { message: `Not Enough Tons sent for minting!!` },
+  50576: { message: `Only deployer is allowed to call this function` },
   62742: { message: `non-sequential NFTs` },
 };
 
@@ -933,9 +957,17 @@ const NftMinter_types: ABIType[] = [
   },
   {
     name: "MintNft",
-    header: 2590352207,
+    header: 1542219593,
     fields: [
       { name: "body", type: { kind: "simple", type: "cell", optional: false } },
+      {
+        name: "amount",
+        type: { kind: "simple", type: "int", optional: false, format: 257 },
+      },
+      {
+        name: "collection_address",
+        type: { kind: "simple", type: "address", optional: false },
+      },
     ],
   },
   {
@@ -1032,7 +1064,10 @@ const NftMinter_getters: ABIGetter[] = [
 
 const NftMinter_receivers: ABIReceiver[] = [
   { receiver: "internal", message: { kind: "typed", type: "MintNft" } },
+  { receiver: "internal", message: { kind: "text", text: "Stop Mint" } },
+  { receiver: "internal", message: { kind: "text", text: "Begin Mint" } },
   { receiver: "internal", message: { kind: "text", text: "withdraw safe" } },
+  { receiver: "internal", message: { kind: "text", text: "Change Owner" } },
   { receiver: "internal", message: { kind: "typed", type: "Deploy" } },
 ];
 
@@ -1069,7 +1104,13 @@ export class NftMinter implements Contract {
     provider: ContractProvider,
     via: Sender,
     args: { value: bigint; bounce?: boolean | null | undefined },
-    message: MintNft | "withdraw safe" | Deploy
+    message:
+      | MintNft
+      | "Stop Mint"
+      | "Begin Mint"
+      | "withdraw safe"
+      | "Change Owner"
+      | Deploy
   ) {
     let body: Cell | null = null;
     if (
@@ -1080,7 +1121,16 @@ export class NftMinter implements Contract {
     ) {
       body = beginCell().store(storeMintNft(message)).endCell();
     }
+    if (message === "Stop Mint") {
+      body = beginCell().storeUint(0, 32).storeStringTail(message).endCell();
+    }
+    if (message === "Begin Mint") {
+      body = beginCell().storeUint(0, 32).storeStringTail(message).endCell();
+    }
     if (message === "withdraw safe") {
+      body = beginCell().storeUint(0, 32).storeStringTail(message).endCell();
+    }
+    if (message === "Change Owner") {
       body = beginCell().storeUint(0, 32).storeStringTail(message).endCell();
     }
     if (

@@ -1,8 +1,7 @@
 import { useTonClient } from "./useTonClient";
 import { useAsyncInitialize } from "./useAsyncInitialize";
 import { useTonConnect } from "./useTonConnect";
-import { Address, OpenedContract, toNano } from "ton-core";
-import { useQuery } from "@tanstack/react-query";
+import { Address, OpenedContract } from "ton-core";
 import { CHAIN } from "@tonconnect/protocol";
 import { MintNft, NftMinter } from "../wrappers/NftMinter";
 
@@ -16,8 +15,8 @@ export function useNFTContract() {
       Address.parse(
         network === CHAIN.MAINNET
           ? "EQA23il1enpk1ibZ19tiJrmZeTGWW1dhio-Bb1wYjs0h9thr"
-          : "EQBfhSH-QZisZD9JepF8L-C6wrD3Dma1SEYztvQhQAnGBoU3"
-      ) // replace with your address from tutorial 2 step 8
+          : "EQBVa1c5fEf02D1DUxjoIVJtzy7gMznyaiteVN8nCbEFFwce"
+      )
     );
     return client.open(contract) as OpenedContract<NftMinter>;
   }, [client]);
@@ -25,11 +24,14 @@ export function useNFTContract() {
   return {
     address: minterContract?.address.toString(),
     sendMintNft: (data: any) => {
+      console.log(data);
       const message: MintNft = {
         $$type: "MintNft",
-        body: data,
+        body: data.body,
+        amount: data.amount,
+        collection_address: data.address,
       };
-      return minterContract?.send(sender, { value: toNano("0.2") }, message);
+      return minterContract?.send(sender, { value: data.value }, message);
     },
   };
 }

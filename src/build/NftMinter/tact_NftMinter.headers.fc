@@ -40,13 +40,13 @@ builder $DeployOk$_store(builder build_0, (int) v) inline;
 cell $DeployOk$_store_cell((int) v) inline;
 
 ;; $MintNft$_load
-(slice, ((cell))) $MintNft$_load(slice sc_0) inline;
+(slice, ((cell, int, slice))) $MintNft$_load(slice sc_0) inline;
 
 ;; $NftMinter$_store
-builder $NftMinter$_store(builder build_0, (slice) v) inline;
+builder $NftMinter$_store(builder build_0, (slice, int) v) inline;
 
 ;; $NftMinter$_load
-(slice, ((slice))) $NftMinter$_load(slice sc_0) inline;
+(slice, ((slice, int))) $NftMinter$_load(slice sc_0) inline;
 
 ;; $StateInit$_not_null
 ((cell, cell)) $StateInit$_not_null(tuple v) inline;
@@ -55,13 +55,13 @@ builder $NftMinter$_store(builder build_0, (slice) v) inline;
 _ $Context$_get_value((int, slice, int, slice) v) inline;
 
 ;; $NftMinter$_contract_init
-(slice) $NftMinter$_contract_init() impure inline_ref;
+(slice, int) $NftMinter$_contract_init() impure inline_ref;
 
 ;; $NftMinter$_contract_load
-(slice) $NftMinter$_contract_load() impure inline_ref;
+(slice, int) $NftMinter$_contract_load() impure inline_ref;
 
 ;; $NftMinter$_contract_store
-() $NftMinter$_contract_store((slice) v) impure inline;
+() $NftMinter$_contract_store((slice, int) v) impure inline;
 
 ;; $global_send
 () $global_send((int, slice, int, int, cell, cell, cell) $params) impure inline_ref;
@@ -73,16 +73,16 @@ _ $Context$_get_value((int, slice, int, slice) v) inline;
 ((int, slice, int, int, cell, cell, cell)) $SendParameters$_constructor_to_value_mode_bounce_body(slice to, int value, int mode, int bounce, cell body) inline;
 
 ;; $NftMinter$_fun_mint
-((slice), ()) $NftMinter$_fun_mint((slice) $self, cell $body) impure inline_ref;
+((slice, int), ()) $NftMinter$_fun_mint((slice, int) $self, cell $body, int $mintAmount, slice $collection_address) impure inline_ref;
 
 ;; $NftMinter$_fun_balance
-((slice), int) $NftMinter$_fun_balance((slice) $self) impure inline_ref;
+((slice, int), int) $NftMinter$_fun_balance((slice, int) $self) impure inline_ref;
 
 ;; $NftMinter$_fun_forward
-((slice), ()) $NftMinter$_fun_forward((slice) $self, slice $to, cell $body, int $bounce, tuple $init) impure inline_ref;
+((slice, int), ()) $NftMinter$_fun_forward((slice, int) $self, slice $to, cell $body, int $bounce, tuple $init) impure inline_ref;
 
 ;; $NftMinter$_fun_notify
-((slice), ()) $NftMinter$_fun_notify((slice) $self, cell $body) impure inline;
+((slice, int), ()) $NftMinter$_fun_notify((slice, int) $self, cell $body) impure inline;
 
 ;; $SendParameters$_constructor_to_bounce_value_mode
 ((int, slice, int, int, cell, cell, cell)) $SendParameters$_constructor_to_bounce_value_mode(slice to, int bounce, int value, int mode) inline;

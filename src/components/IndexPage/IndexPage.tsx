@@ -4,7 +4,7 @@ import { DeployNfts } from "../DeployNfts";
 
 export function IndexPage() {
   return (
-    <div className="container mx-auto pt-4 pb-12">
+    <div className="  mx-auto  ">
       <DeployNfts />
     </div>
   );

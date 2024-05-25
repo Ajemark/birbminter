@@ -4,57 +4,76 @@
 
 #include "tact_NftMinter.headers.fc";
 #include "tact_NftMinter.stdlib.fc";
-#include "tact_NftMinter.constants.fc";
 #include "tact_NftMinter.storage.fc";
 
 ;;
 ;; Contract NftMinter functions
 ;;
 
-(slice) $NftMinter$_contract_init() impure inline_ref {
-    var (($self'owner)) = (null());
+(slice, int) $NftMinter$_contract_init() impure inline_ref {
+    var (($self'owner, $self'isMinting)) = (null(), null());
     $self'owner = __tact_context_get_sender();
-    return ($self'owner);
+    $self'isMinting = true;
+    return ($self'owner, $self'isMinting);
 }
 
-((slice), ()) $NftMinter$_fun_mint((slice) $self, cell $body) impure inline_ref {
-    var (($self'owner)) = $self;
-    int $msgValue = $Context$_get_value(__tact_context_get());
-    int $tonBalanceBeforeMsg = (__tact_my_balance() - $msgValue);
-    int $storageFee = (30000000 - min($tonBalanceBeforeMsg, 30000000));
-    $msgValue = ($msgValue - ($storageFee + 30000000));
-    $global_send($SendParameters$_constructor_to_value_mode_bounce_body(__gen_slice_address_49318041ad83e2d189e2903c00bff95838c9dbe23f28e1fd469cfae4b974364c(), $msgValue, 2, true, $body));
-    return (($self'owner), ());
+((slice, int), ()) $NftMinter$_fun_mint((slice, int) $self, cell $body, int $mintAmount, slice $collection_address) impure inline_ref {
+    var (($self'owner, $self'isMinting)) = $self;
+    throw_unless(50195, ($Context$_get_value(__tact_context_get()) >= (6000000000 * $mintAmount)));
+    $global_send($SendParameters$_constructor_to_value_mode_bounce_body($collection_address, ($Context$_get_value(__tact_context_get()) - (6000000000 * $mintAmount)), 2, true, $body));
+    return (($self'owner, $self'isMinting), ());
 }
 
-((slice), int) $NftMinter$_fun_balance((slice) $self) impure inline_ref {
-    var (($self'owner)) = $self;
-    return (($self'owner), __tact_my_balance());
+((slice, int), int) $NftMinter$_fun_balance((slice, int) $self) impure inline_ref {
+    var (($self'owner, $self'isMinting)) = $self;
+    return (($self'owner, $self'isMinting), __tact_my_balance());
 }
 
 ;;
 ;; Receivers of a Contract NftMinter
 ;;
 
-(((slice)), ()) $NftMinter$_internal_binary_MintNft((slice) $self, (cell) $msg) impure inline {
-    var ($self'owner) = $self;
-    var ($msg'body) = $msg;
-    ($self'owner)~$NftMinter$_fun_mint($msg'body);
-    return (($self'owner), ());
+(((slice, int)), ()) $NftMinter$_internal_binary_MintNft((slice, int) $self, (cell, int, slice) $msg) impure inline {
+    var ($self'owner, $self'isMinting) = $self;
+    var ($msg'body, $msg'amount, $msg'collection_address) = $msg;
+    throw_unless(41620, ($self'isMinting == true));
+    ($self'owner, $self'isMinting)~$NftMinter$_fun_mint($msg'body, $msg'amount, $msg'collection_address);
+    return (($self'owner, $self'isMinting), ());
 }
 
-((slice), ()) $NftMinter$_internal_text_beb2935a82089b154d32f99c4377aa960aa115366cc2c602755e36b97f505cec((slice) $self) impure inline {
-    var ($self'owner) = $self;
+((slice, int), ()) $NftMinter$_internal_text_a2f43c647fca1834ba717617790fa8ce6fe6ee0cb77d0b3ef0a89a93b33176f2((slice, int) $self) impure inline {
+    var ($self'owner, $self'isMinting) = $self;
+    throw_unless(50576, ( __tact_slice_eq_bits($self'owner, __tact_context_get_sender()) ));
+    $self'isMinting = false;
+    return (($self'owner, $self'isMinting), ());
+}
+
+((slice, int), ()) $NftMinter$_internal_text_b10e7c1a8d0e32d543f35599087435afe57d4d6f470f2d2aa9cae4e8c9648cae((slice, int) $self) impure inline {
+    var ($self'owner, $self'isMinting) = $self;
+    throw_unless(50576, ( __tact_slice_eq_bits($self'owner, __tact_context_get_sender()) ));
+    $self'isMinting = true;
+    return (($self'owner, $self'isMinting), ());
+}
+
+((slice, int), ()) $NftMinter$_internal_text_beb2935a82089b154d32f99c4377aa960aa115366cc2c602755e36b97f505cec((slice, int) $self) impure inline {
+    var ($self'owner, $self'isMinting) = $self;
     throw_unless(15509, ( __tact_slice_eq_bits($self'owner, __tact_context_get_sender()) ));
     $global_send($SendParameters$_constructor_to_bounce_value_mode(__tact_context_get_sender(), true, ((__tact_my_balance() - $Context$_get_value(__tact_context_get())) - 30000000), (64 + 2)));
-    return (($self'owner), ());
+    return (($self'owner, $self'isMinting), ());
 }
 
-(((slice)), ()) $NftMinter$_internal_binary_Deploy((slice) $self, (int) $deploy) impure inline {
-    var ($self'owner) = $self;
+((slice, int), ()) $NftMinter$_internal_text_449f09b99261f64066094f13d6dc5978d0d6935695b98d3bf364be8695e9b0d3((slice, int) $self) impure inline {
+    var ($self'owner, $self'isMinting) = $self;
+    throw_unless(36877, ( __tact_slice_eq_bits($self'owner, __tact_context_get_sender()) ));
+    $self'owner = __tact_context_get_sender();
+    return (($self'owner, $self'isMinting), ());
+}
+
+(((slice, int)), ()) $NftMinter$_internal_binary_Deploy((slice, int) $self, (int) $deploy) impure inline {
+    var ($self'owner, $self'isMinting) = $self;
     var ($deploy'queryId) = $deploy;
-    ($self'owner)~$NftMinter$_fun_notify($DeployOk$_store_cell($DeployOk$_constructor_queryId($deploy'queryId)));
-    return (($self'owner), ());
+    ($self'owner, $self'isMinting)~$NftMinter$_fun_notify($DeployOk$_store_cell($DeployOk$_constructor_queryId($deploy'queryId)));
+    return (($self'owner, $self'isMinting), ());
 }
 
 ;;
@@ -77,7 +96,7 @@ _ supported_interfaces() method_id {
 }
 
 _ get_abi_ipfs() method_id {
-    return "ipfs://QmQtHfkLTXSwHbfQJy5jiY3CKFAFoFcLNGJoNN2bDA77U4";
+    return "ipfs://QmTVSxr3cu7JuW2yvtU3VjXe2jAy1B6kh3xLdDzTSosSb6";
 }
 
 _ lazy_deployment_completed() method_id {
@@ -88,7 +107,7 @@ _ lazy_deployment_completed() method_id {
 ;; Routing of a Contract NftMinter
 ;;
 
-((slice), int) $NftMinter$_contract_router_internal((slice) self, int msg_bounced, slice in_msg) impure inline_ref {
+((slice, int), int) $NftMinter$_contract_router_internal((slice, int) self, int msg_bounced, slice in_msg) impure inline_ref {
     ;; Handle bounced messages
     if (msg_bounced) {
         return (self, true);
@@ -102,7 +121,7 @@ _ lazy_deployment_completed() method_id {
     
     
     ;; Receive MintNft message
-    if (op == 2590352207) {
+    if (op == 1542219593) {
         var msg = in_msg~$MintNft$_load();
         self~$NftMinter$_internal_binary_MintNft(msg);
         return (self, true);
@@ -119,9 +138,27 @@ _ lazy_deployment_completed() method_id {
     if (op == 0) {
         var text_op = slice_hash(in_msg);
         
+        ;; Receive "Stop Mint" message
+        if (text_op == 0xa2f43c647fca1834ba717617790fa8ce6fe6ee0cb77d0b3ef0a89a93b33176f2) {
+            self~$NftMinter$_internal_text_a2f43c647fca1834ba717617790fa8ce6fe6ee0cb77d0b3ef0a89a93b33176f2();
+            return (self, true);
+        }
+        
+        ;; Receive "Begin Mint" message
+        if (text_op == 0xb10e7c1a8d0e32d543f35599087435afe57d4d6f470f2d2aa9cae4e8c9648cae) {
+            self~$NftMinter$_internal_text_b10e7c1a8d0e32d543f35599087435afe57d4d6f470f2d2aa9cae4e8c9648cae();
+            return (self, true);
+        }
+        
         ;; Receive "withdraw safe" message
         if (text_op == 0xbeb2935a82089b154d32f99c4377aa960aa115366cc2c602755e36b97f505cec) {
             self~$NftMinter$_internal_text_beb2935a82089b154d32f99c4377aa960aa115366cc2c602755e36b97f505cec();
+            return (self, true);
+        }
+        
+        ;; Receive "Change Owner" message
+        if (text_op == 0x449f09b99261f64066094f13d6dc5978d0d6935695b98d3bf364be8695e9b0d3) {
+            self~$NftMinter$_internal_text_449f09b99261f64066094f13d6dc5978d0d6935695b98d3bf364be8695e9b0d3();
             return (self, true);
         }
     }
