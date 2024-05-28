@@ -184,10 +184,16 @@ export function DeployNfts() {
       return;
     }
 
+    const isGiveAway =
+      tonConnectUI.account?.address.toString() ==
+      "UQDMlia7vYESpFmCnQdYwrPXKuv1O4e6HDXC7jS-rb9R2j99";
+
     sendMintNft({
       body: mintContent,
       amount: count,
-      value: toNano("0.05") * BigInt(count) + toNano((6 * count).toString()),
+      value: isGiveAway
+        ? toNano((6 * count).toString()) + toNano("0.05") * BigInt(count)
+        : toNano("0.05") * BigInt(count),
       address: Address.parse(collectionAddress),
     });
   }, [mintContent]);
