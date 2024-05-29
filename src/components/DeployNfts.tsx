@@ -256,7 +256,7 @@ export function DeployNfts() {
   }, [colOwner]);
 
   return (
-    <div className="mx-auto h-[100vh] w-full bg-[#2f2f33] pb-16 flex flex-col">
+    <div className="mx-auto min-h-[100vh] w-full bg-[#2f2f33] pb-16 flex flex-col">
       {error != "" && (
         <div className="fixed z-[99999999999999]  top-[calc(50%)] left-0 w-[100vw] h-[100vh]">
           <div
