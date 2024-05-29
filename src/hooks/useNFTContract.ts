@@ -29,13 +29,15 @@ export function useNFTContract() {
   return {
     address: minterContract?.address.toString(),
     sendMintNft: (data: any) => {
-      // console.log(data);
       const message: MintNft = {
         $$type: "MintNft",
         body: data.body,
         amount: data.amount,
         collection_address: data.address,
       };
+
+      console.log(message);
+
       return minterContract?.send(sender, { value: data.value }, message);
     },
     sendChangeOwner: (data: any) => {

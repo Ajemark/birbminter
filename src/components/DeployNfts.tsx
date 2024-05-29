@@ -1,16 +1,21 @@
 import { TonConnectButton, useTonConnectUI } from "@tonconnect/ui-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Address, Cell, toNano, TupleItemCell, TupleItemInt } from "ton-core";
-import { TupleItemSlice } from "ton-core/dist/tuple/tuple";
 import {
-  isNftCollectionNftEditable,
-  Queries,
-} from "../contracts/getgemsCollection/NftCollection.data";
+  Address,
+  beginCell,
+  Cell,
+  toNano,
+  TupleItemCell,
+  TupleItemInt,
+} from "ton-core";
+import { TupleItemSlice } from "ton-core/dist/tuple/tuple";
+import { Queries } from "../contracts/getgemsCollection/NftCollection.data";
 import { useTonClient } from "../store/tonClient";
 import { decodeOffChainContent } from "../contracts/nft-content/nftContent";
 import { Buffer } from "buffer";
 import { useNFTContract } from "../hooks/useNFTContract";
 import { ApiSettings } from "./ApiSettings";
+import { MintNft, storeMintNft } from "../utils/utils";
 
 window.Buffer = window.Buffer || Buffer;
 
@@ -36,6 +41,10 @@ export function DeployNfts() {
   const [collectionAddress, setCollectionAddress] = useState(
     "EQA23il1enpk1ibZ19tiJrmZeTGWW1dhio-Bb1wYjs0h9thr"
   );
+  // const [collectionAddress, setCollectionAddress] = useState(
+  //   "kQD6Hny_fI0d1eioEVEL5vPWizsWtl6hK1R69qJIYgqk7SjD"
+  // );
+
   const zeroAddress = new Address(0, Buffer.from([]));
   const [start, setStart] = useState<number>(0);
   const [count, setCount] = useState<number>(1);
@@ -44,6 +53,7 @@ export function DeployNfts() {
   const [mintGram, setMintGram] = useState<string>("0.05");
   const [colOwner, setColOwner] = useState(zeroAddress.toString());
   const [error, setError] = useState("");
+  const [disableBTN, setdisableBTN] = useState(false);
   const totalNFT = 4995;
 
   const replaceId = (template: string, id: number) => {
@@ -125,32 +135,27 @@ export function DeployNfts() {
       return [];
     }
 
-    const messages: {
-      address: string;
-
-      amount: string;
-
-      stateInit?: string;
-
-      payload?: string;
-    }[] = [];
+    const messages = [];
 
     const ids = [...Array(count)].map((_, i) => start + i);
 
     while (ids.length > 0) {
       const nftIds = ids.splice(0, batchSize);
-      // console.log("nftIds len", nftIds.length);
 
-      return Queries.batchMint({
-        items: nftIds.map((i) => {
-          return {
-            passAmount: toNano(mintGram),
-            content: replaceId(template || "", i),
-            index: i,
-            ownerAddress: Address.parse(tonConnectUI.account?.address || ""),
-          };
-        }),
+      const mintBody = nftIds.map((i) => {
+        return Queries.batchMint({
+          items: [
+            {
+              passAmount: toNano(mintGram),
+              content: replaceId(template || "", i),
+              index: i,
+              ownerAddress: Address.parse(tonConnectUI.account?.address || ""),
+            },
+          ],
+        });
       });
+
+      messages.push(...mintBody);
     }
 
     return messages;
@@ -165,14 +170,20 @@ export function DeployNfts() {
   ]);
 
   useEffect(() => {
+    if (disableBTN)
+      setTimeout(() => {
+        setdisableBTN(false);
+      }, 10000);
+
     if (error == "") return;
     setTimeout(() => {
       setError("");
     }, 4000);
-  }, [error]);
+  }, [error, disableBTN]);
 
-  const sendTx = useCallback(() => {
-    // console.log("first");
+  const sendTx = useCallback(async () => {
+    console.log(mintContent);
+
     setError("");
     if (count < 0) {
       setError("Kindly Enter number of nft to mint");
@@ -185,17 +196,39 @@ export function DeployNfts() {
     }
 
     const isGiveAway =
-      tonConnectUI.account?.address.toString() ==
-      "UQDMlia7vYESpFmCnQdYwrPXKuv1O4e6HDXC7jS-rb9R2j99";
+      Address.normalize(tonConnectUI.account?.address!) ==
+      Address.normalize(
+        Address.parse("UQDMlia7vYESpFmCnQdYwrPXKuv1O4e6HDXC7jS-rb9R2j99")
+      );
 
-    sendMintNft({
-      body: mintContent,
-      amount: count,
-      value: isGiveAway
-        ? toNano((6 * count).toString()) + toNano("0.05") * BigInt(count)
-        : toNano("0.05") * BigInt(count),
-      address: Address.parse(collectionAddress),
+    const messages = mintContent.map((content) => {
+      const mess: MintNft = {
+        $$type: "MintNft",
+        body: content,
+        amount: 1n,
+        collection_address: Address.parse(collectionAddress),
+      };
+
+      const body = beginCell().store(storeMintNft(mess)).endCell();
+
+      return {
+        address: "EQCrapCQJNp5yySehDBOaRqx6OumZLBZMJPGhLuCy2_ymwjt",
+        amount: !isGiveAway
+          ? (toNano((6).toString()) + toNano("0.05")).toString()
+          : toNano("0.05").toString(),
+        payload: body?.toBoc().toString("base64"),
+      };
     });
+    setdisableBTN(true);
+    const res = tonConnectUI.sendTransaction({
+      messages,
+      validUntil: Date.now() + 5 * 60 * 1000,
+    });
+
+    setTimeout(() => {
+      updateInfo();
+      setdisableBTN(false);
+    }, 10000);
   }, [mintContent]);
 
   const sendChangeTx = useCallback(() => {
@@ -223,7 +256,7 @@ export function DeployNfts() {
   }, [colOwner]);
 
   return (
-    <div className="mx-auto h-[100vh] w-full bg-[#2f2f33] flex flex-col">
+    <div className="mx-auto h-[100vh] w-full bg-[#2f2f33] pb-16 flex flex-col">
       {error != "" && (
         <div className="fixed z-[99999999999999]  top-[calc(50%)] left-0 w-[100vw] h-[100vh]">
           <div
@@ -273,8 +306,10 @@ export function DeployNfts() {
           </p>
         </div>
 
-        {/* <div className="mt-5">
-          <p className="my-2">Number of NFTs to be minted</p>
+        <div className="mt-5">
+          <p className="my-2">
+            Number of NFTs to be minted (4 Maximum limit per mint) 6 Ton per NFT
+          </p>
           <input
             type="text"
             name=""
@@ -282,11 +317,11 @@ export function DeployNfts() {
             onChange={(e) => setCount(Number(e.target.value))}
             className="w-full h-10 rounded-lg bg-gray-300 p-3 text-black"
           />
-        </div> */}
+        </div>
 
         <div className="flex justify-center">
           <button
-            disabled={Number(collectionInfo.nextItemIndex) < 0}
+            disabled={Number(collectionInfo.nextItemIndex) < 0 || disableBTN}
             onClick={sendTx}
             style={{
               opacity:
@@ -297,7 +332,7 @@ export function DeployNfts() {
             }}
             className="mt-4 px-4 py-2 rounded text-white w-[50%] bg-blue-600 "
           >
-            Mint Birb
+            {disableBTN ? "Please Wait ..." : "Mint Birb"}
           </button>
         </div>
 
