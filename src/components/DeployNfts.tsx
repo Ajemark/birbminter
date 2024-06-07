@@ -56,6 +56,7 @@ export function DeployNfts() {
   const [colOwner, setColOwner] = useState(zeroAddress.toString());
   const [error, setError] = useState("");
   const [disableBTN, setdisableBTN] = useState(false);
+  const [load, setLoad] = useState(false);
   const totalNFT = 4995;
 
   const replaceId = (template: string, id: number) => {
@@ -63,9 +64,18 @@ export function DeployNfts() {
   };
 
   const getRefData = async () => {
-    setCode(
-      (await fetchCode(Address.parse(tonConnectUI.account?.address!))) ?? 1n
-    );
+    if (!tonConnectUI.account?.address) return;
+    if (code) return;
+
+    setTimeout(() => {
+      let getD = async () => {
+        setLoad(!load);
+        setCode(
+          (await fetchCode(Address.parse(tonConnectUI.account?.address!))) ?? 1n
+        );
+      };
+      getD();
+    }, 3000);
   };
 
   const updateInfo = async () => {
@@ -136,7 +146,7 @@ export function DeployNfts() {
 
   useEffect(() => {
     getRefData();
-  }, [tonConnectUI, tonConnectUI.account, tonClient]);
+  }, [tonConnectUI, load, tonConnectUI.account?.address, tonClient]);
 
   const mintContent = useMemo(() => {
     if (!count || count < 1) {
@@ -194,8 +204,6 @@ export function DeployNfts() {
   }, [error, disableBTN]);
 
   const sendTx = useCallback(async () => {
-    console.log(mintContent);
-
     setError("");
     if (count < 0) {
       setError("Kindly Enter number of nft to mint");

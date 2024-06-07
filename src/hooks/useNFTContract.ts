@@ -85,6 +85,7 @@ export function useNFTContract() {
     fetchCode: async (address: Address) => {
       return (await minterContract!.getUserCode()).get(address);
     },
+
     // getOwner: async (address: Address) => {
     //   return (await minterContract!.getOwner);
     // },
