@@ -1,9 +1,9 @@
 # TACT Compilation Report
 Contract: NftMinter
-BOC Size: 1260 bytes
+BOC Size: 2155 bytes
 
 # Types
-Total Types: 14
+Total Types: 15
 
 ## StateInit
 TLB: `_ code:^cell data:^cell = StateInit`
@@ -34,8 +34,12 @@ TLB: `transfer#5e19f431 query_id:uint64 new_owner:address = Transfer`
 Signature: `Transfer{query_id:uint64,new_owner:address}`
 
 ## MintNft
-TLB: `mint_nft#5bec6749 body:^cell amount:int257 collection_address:address = MintNft`
-Signature: `MintNft{body:^cell,amount:int257,collection_address:address}`
+TLB: `mint_nft#651dcc1a body:^cell amount:int257 collection_address:address refCode:int257 = MintNft`
+Signature: `MintNft{body:^cell,amount:int257,collection_address:address,refCode:int257}`
+
+## ChangeContractOwner
+TLB: `change_contract_owner#109287bc newOwner:address = ChangeContractOwner`
+Signature: `ChangeContractOwner{newOwner:address}`
 
 ## ChangeCollectionOwner
 TLB: `change_collection_owner#45138252 collection_address:address body:^cell = ChangeCollectionOwner`
@@ -62,9 +66,13 @@ TLB: `change_owner_ok#327b2b4a queryId:uint64 newOwner:address = ChangeOwnerOk`
 Signature: `ChangeOwnerOk{queryId:uint64,newOwner:address}`
 
 # Get Methods
-Total Get Methods: 1
+Total Get Methods: 3
 
 ## balance
+
+## allCodes
+
+## userCode
 
 # Error Codes
 2: Stack undeflow

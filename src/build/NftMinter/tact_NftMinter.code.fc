@@ -4,82 +4,145 @@
 
 #include "tact_NftMinter.headers.fc";
 #include "tact_NftMinter.stdlib.fc";
+#include "tact_NftMinter.constants.fc";
 #include "tact_NftMinter.storage.fc";
 
 ;;
 ;; Contract NftMinter functions
 ;;
 
-(slice, slice, int) $NftMinter$_contract_init(slice $g_address) impure inline_ref {
-    var (($self'owner, $self'giveAwayAddress, $self'isMinting)) = (null(), null(), null());
+(slice, slice, int, cell, cell, cell) $NftMinter$_contract_init(slice $g_address, slice $admin) impure inline_ref {
+    var (($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts)) = (null(), null(), null(), null(), null(), null());
     $self'owner = __tact_context_get_sender();
     $self'isMinting = true;
     $self'giveAwayAddress = $g_address;
-    return ($self'owner, $self'giveAwayAddress, $self'isMinting);
+    $self'referral~__tact_dict_set_int_slice(257, 0, __tact_create_address(0, 0));
+    $self'referralAdd~__tact_dict_set_slice_int(267, __tact_create_address(0, 0), 0, 257);
+    return ($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts);
 }
 
-((slice, slice, int), ()) $NftMinter$_fun_mint((slice, slice, int) $self, cell $body, int $mintAmount, slice $collection_address) impure inline_ref {
-    var (($self'owner, $self'giveAwayAddress, $self'isMinting)) = $self;
+((slice, slice, int, cell, cell, cell), ()) $NftMinter$_fun_mint((slice, slice, int, cell, cell, cell) $self, cell $body, int $mintAmount, slice $collection_address, int $refCode) impure inline_ref {
+    var (($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts)) = $self;
     if (( __tact_slice_eq_bits($self'giveAwayAddress, __tact_context_get_sender()) )) {
         $global_send($SendParameters$_constructor_to_value_mode_bounce_body($collection_address, 50000000, 2, true, $body));
-        return (($self'owner, $self'giveAwayAddress, $self'isMinting), ());
+        return (($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts), ());
     }
     throw_unless(50195, ($Context$_get_value(__tact_context_get()) >= (6000000000 * $mintAmount)));
+    slice $referrer = __tact_dict_get_int_slice($self'referral, 257, $refCode);
+    if ((~ null?($referrer))) {
+        int $refCount = __tact_dict_get_slice_int($self'referralCounts, 267, __tact_not_null($referrer), 257);
+        if ((~ null?($refCount))) {
+            $self'referralCounts~__tact_dict_set_slice_int(267, __tact_not_null($referrer), (__tact_not_null($refCount) + 1), 257);
+        } else {
+            $self'referralCounts~__tact_dict_set_slice_int(267, __tact_not_null($referrer), 1, 257);
+        }
+        $global_send($SendParameters$_constructor_to_value_mode_bounce_body(__tact_not_null($referrer), (180000000 * $mintAmount), 2, true, __gen_cell_comment_a64743db26c6790bb24634873528477ba3f47d89b38180913cf4e9978a115863()));
+    }
     $global_send($SendParameters$_constructor_to_value_mode_bounce_body($collection_address, ($Context$_get_value(__tact_context_get()) - (6000000000 * $mintAmount)), 2, true, $body));
-    return (($self'owner, $self'giveAwayAddress, $self'isMinting), ());
+    return (($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts), ());
 }
 
-((slice, slice, int), int) $NftMinter$_fun_balance((slice, slice, int) $self) impure inline_ref {
-    var (($self'owner, $self'giveAwayAddress, $self'isMinting)) = $self;
-    return (($self'owner, $self'giveAwayAddress, $self'isMinting), __tact_my_balance());
+((slice, slice, int, cell, cell, cell), int) $NftMinter$_fun_balance((slice, slice, int, cell, cell, cell) $self) impure inline_ref {
+    var (($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts)) = $self;
+    return (($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts), __tact_my_balance());
+}
+
+((slice, slice, int, cell, cell, cell), int) $NftMinter$_fun_code((slice, slice, int, cell, cell, cell) $self) impure inline_ref {
+    var (($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts)) = $self;
+    int $number = $global_random(10000, 9999999);
+    slice $user = __tact_dict_get_int_slice($self'referral, 257, $number);
+    if (null?($user)) {
+        $self'referral~__tact_dict_set_int_slice(257, $number, __tact_context_get_sender());
+        $self'referralAdd~__tact_dict_set_slice_int(267, __tact_context_get_sender(), $number, 257);
+        return (($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts), $number);
+    }
+    $number = $global_random(10000, 9999999);
+    $user = __tact_dict_get_int_slice($self'referral, 257, $number);
+    if (null?($user)) {
+        $self'referral~__tact_dict_set_int_slice(257, $number, __tact_context_get_sender());
+        $self'referralAdd~__tact_dict_set_slice_int(267, __tact_context_get_sender(), $number, 257);
+        return (($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts), $number);
+    }
+    $number = $global_random(10000, 9999999);
+    $user = __tact_dict_get_int_slice($self'referral, 257, $number);
+    if (null?($user)) {
+        $self'referral~__tact_dict_set_int_slice(257, $number, __tact_context_get_sender());
+        $self'referralAdd~__tact_dict_set_slice_int(267, __tact_context_get_sender(), $number, 257);
+        return (($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts), $number);
+    }
+    return (($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts), 503);
+}
+
+((slice, slice, int, cell, cell, cell), cell) $NftMinter$_fun_allCodes((slice, slice, int, cell, cell, cell) $self) impure inline_ref {
+    var (($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts)) = $self;
+    return (($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts), $self'referral);
+}
+
+((slice, slice, int, cell, cell, cell), cell) $NftMinter$_fun_userCode((slice, slice, int, cell, cell, cell) $self) impure inline_ref {
+    var (($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts)) = $self;
+    return (($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts), $self'referralAdd);
 }
 
 ;;
 ;; Receivers of a Contract NftMinter
 ;;
 
-(((slice, slice, int)), ()) $NftMinter$_internal_binary_MintNft((slice, slice, int) $self, (cell, int, slice) $msg) impure inline {
-    var ($self'owner, $self'giveAwayAddress, $self'isMinting) = $self;
-    var ($msg'body, $msg'amount, $msg'collection_address) = $msg;
+(((slice, slice, int, cell, cell, cell)), ()) $NftMinter$_internal_binary_MintNft((slice, slice, int, cell, cell, cell) $self, (cell, int, slice, int) $msg) impure inline {
+    var ($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts) = $self;
+    var ($msg'body, $msg'amount, $msg'collection_address, $msg'refCode) = $msg;
     throw_unless(41620, ($self'isMinting == true));
-    ($self'owner, $self'giveAwayAddress, $self'isMinting)~$NftMinter$_fun_mint($msg'body, $msg'amount, $msg'collection_address);
-    return (($self'owner, $self'giveAwayAddress, $self'isMinting), ());
+    ($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts)~$NftMinter$_fun_mint($msg'body, $msg'amount, $msg'collection_address, $msg'refCode);
+    return (($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts), ());
 }
 
-((slice, slice, int), ()) $NftMinter$_internal_text_a2f43c647fca1834ba717617790fa8ce6fe6ee0cb77d0b3ef0a89a93b33176f2((slice, slice, int) $self) impure inline {
-    var ($self'owner, $self'giveAwayAddress, $self'isMinting) = $self;
+((slice, slice, int, cell, cell, cell), ()) $NftMinter$_internal_text_a2f43c647fca1834ba717617790fa8ce6fe6ee0cb77d0b3ef0a89a93b33176f2((slice, slice, int, cell, cell, cell) $self) impure inline {
+    var ($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts) = $self;
     throw_unless(50576, ( __tact_slice_eq_bits($self'owner, __tact_context_get_sender()) ));
     $self'isMinting = false;
-    return (($self'owner, $self'giveAwayAddress, $self'isMinting), ());
+    return (($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts), ());
 }
 
-((slice, slice, int), ()) $NftMinter$_internal_text_b10e7c1a8d0e32d543f35599087435afe57d4d6f470f2d2aa9cae4e8c9648cae((slice, slice, int) $self) impure inline {
-    var ($self'owner, $self'giveAwayAddress, $self'isMinting) = $self;
+((slice, slice, int, cell, cell, cell), ()) $NftMinter$_internal_text_b10e7c1a8d0e32d543f35599087435afe57d4d6f470f2d2aa9cae4e8c9648cae((slice, slice, int, cell, cell, cell) $self) impure inline {
+    var ($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts) = $self;
     throw_unless(50576, ( __tact_slice_eq_bits($self'owner, __tact_context_get_sender()) ));
     $self'isMinting = true;
-    return (($self'owner, $self'giveAwayAddress, $self'isMinting), ());
+    return (($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts), ());
 }
 
-((slice, slice, int), ()) $NftMinter$_internal_text_beb2935a82089b154d32f99c4377aa960aa115366cc2c602755e36b97f505cec((slice, slice, int) $self) impure inline {
-    var ($self'owner, $self'giveAwayAddress, $self'isMinting) = $self;
+((slice, slice, int, cell, cell, cell), ()) $NftMinter$_internal_text_beb2935a82089b154d32f99c4377aa960aa115366cc2c602755e36b97f505cec((slice, slice, int, cell, cell, cell) $self) impure inline {
+    var ($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts) = $self;
     throw_unless(15509, ( __tact_slice_eq_bits($self'owner, __tact_context_get_sender()) ));
     $global_send($SendParameters$_constructor_to_bounce_value_mode(__tact_context_get_sender(), true, ((__tact_my_balance() - $Context$_get_value(__tact_context_get())) - 30000000), (64 + 2)));
-    return (($self'owner, $self'giveAwayAddress, $self'isMinting), ());
+    return (($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts), ());
 }
 
-(((slice, slice, int)), ()) $NftMinter$_internal_binary_ChangeCollectionOwner((slice, slice, int) $self, (slice, cell) $msg) impure inline {
-    var ($self'owner, $self'giveAwayAddress, $self'isMinting) = $self;
+((slice, slice, int, cell, cell, cell), ()) $NftMinter$_internal_text_96110eb38cf53e9accf0ea5a1f2756ddd61e6d4b0b4fcb5404b7e5a49cec739f((slice, slice, int, cell, cell, cell) $self) impure inline {
+    var ($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts) = $self;
+    ($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts)~$NftMinter$_fun_code();
+    return (($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts), ());
+}
+
+(((slice, slice, int, cell, cell, cell)), ()) $NftMinter$_internal_binary_ChangeCollectionOwner((slice, slice, int, cell, cell, cell) $self, (slice, cell) $msg) impure inline {
+    var ($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts) = $self;
     var ($msg'collection_address, $msg'body) = $msg;
     throw_unless(49699, ( __tact_slice_eq_bits($self'owner, __tact_context_get_sender()) ));
-    $global_send($SendParameters$_constructor_to_value_mode_bounce_body($msg'collection_address, 50000000, 2, true, $msg'body));
-    return (($self'owner, $self'giveAwayAddress, $self'isMinting), ());
+    $global_send($SendParameters$_constructor_to_value_mode_bounce_body($msg'collection_address, 10000000, 2, true, $msg'body));
+    return (($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts), ());
 }
 
-(((slice, slice, int)), ()) $NftMinter$_internal_binary_Deploy((slice, slice, int) $self, (int) $deploy) impure inline {
-    var ($self'owner, $self'giveAwayAddress, $self'isMinting) = $self;
+(((slice, slice, int, cell, cell, cell)), ()) $NftMinter$_internal_binary_ChangeContractOwner((slice, slice, int, cell, cell, cell) $self, (slice) $msg) impure inline {
+    var ($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts) = $self;
+    var ($msg'newOwner) = $msg;
+    throw_unless(49699, ( __tact_slice_eq_bits($self'owner, __tact_context_get_sender()) ));
+    $self'owner = $msg'newOwner;
+    return (($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts), ());
+}
+
+(((slice, slice, int, cell, cell, cell)), ()) $NftMinter$_internal_binary_Deploy((slice, slice, int, cell, cell, cell) $self, (int) $deploy) impure inline {
+    var ($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts) = $self;
     var ($deploy'queryId) = $deploy;
-    ($self'owner, $self'giveAwayAddress, $self'isMinting)~$NftMinter$_fun_notify($DeployOk$_store_cell($DeployOk$_constructor_queryId($deploy'queryId)));
-    return (($self'owner, $self'giveAwayAddress, $self'isMinting), ());
+    ($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts)~$NftMinter$_fun_notify($DeployOk$_store_cell($DeployOk$_constructor_queryId($deploy'queryId)));
+    return (($self'owner, $self'giveAwayAddress, $self'isMinting, $self'referral, $self'referralAdd, $self'referralCounts), ());
 }
 
 ;;
@@ -89,6 +152,18 @@
 _ %balance() method_id(104128) {
     var self = $NftMinter$_contract_load();
     var res = self~$NftMinter$_fun_balance();
+    return res;
+}
+
+_ %allCodes() method_id(127207) {
+    var self = $NftMinter$_contract_load();
+    var res = self~$NftMinter$_fun_allCodes();
+    return res;
+}
+
+_ %userCode() method_id(88250) {
+    var self = $NftMinter$_contract_load();
+    var res = self~$NftMinter$_fun_userCode();
     return res;
 }
 
@@ -102,7 +177,7 @@ _ supported_interfaces() method_id {
 }
 
 _ get_abi_ipfs() method_id {
-    return "ipfs://QmRaeSR8Z61AnUY7ZJsNwcNNzzUxuANAkSWYxaQ9mfpr9w";
+    return "ipfs://QmbapqH3XVecEq2A3JUpsjQRkLYLafmcLMLm58PqqeQt5U";
 }
 
 _ lazy_deployment_completed() method_id {
@@ -113,7 +188,7 @@ _ lazy_deployment_completed() method_id {
 ;; Routing of a Contract NftMinter
 ;;
 
-((slice, slice, int), int) $NftMinter$_contract_router_internal((slice, slice, int) self, int msg_bounced, slice in_msg) impure inline_ref {
+((slice, slice, int, cell, cell, cell), int) $NftMinter$_contract_router_internal((slice, slice, int, cell, cell, cell) self, int msg_bounced, slice in_msg) impure inline_ref {
     ;; Handle bounced messages
     if (msg_bounced) {
         return (self, true);
@@ -127,7 +202,7 @@ _ lazy_deployment_completed() method_id {
     
     
     ;; Receive MintNft message
-    if (op == 1542219593) {
+    if (op == 1696451610) {
         var msg = in_msg~$MintNft$_load();
         self~$NftMinter$_internal_binary_MintNft(msg);
         return (self, true);
@@ -137,6 +212,13 @@ _ lazy_deployment_completed() method_id {
     if (op == 1158906450) {
         var msg = in_msg~$ChangeCollectionOwner$_load();
         self~$NftMinter$_internal_binary_ChangeCollectionOwner(msg);
+        return (self, true);
+    }
+    
+    ;; Receive ChangeContractOwner message
+    if (op == 278038460) {
+        var msg = in_msg~$ChangeContractOwner$_load();
+        self~$NftMinter$_internal_binary_ChangeContractOwner(msg);
         return (self, true);
     }
     
@@ -166,6 +248,12 @@ _ lazy_deployment_completed() method_id {
         ;; Receive "withdraw safe" message
         if (text_op == 0xbeb2935a82089b154d32f99c4377aa960aa115366cc2c602755e36b97f505cec) {
             self~$NftMinter$_internal_text_beb2935a82089b154d32f99c4377aa960aa115366cc2c602755e36b97f505cec();
+            return (self, true);
+        }
+        
+        ;; Receive "get referral code" message
+        if (text_op == 0x96110eb38cf53e9accf0ea5a1f2756ddd61e6d4b0b4fcb5404b7e5a49cec739f) {
+            self~$NftMinter$_internal_text_96110eb38cf53e9accf0ea5a1f2756ddd61e6d4b0b4fcb5404b7e5a49cec739f();
             return (self, true);
         }
     }

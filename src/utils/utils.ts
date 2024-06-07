@@ -40,20 +40,21 @@ export const changeOwner = (params: {
   msgBody.storeAddress(params.newOwner);
   return msgBody.endCell();
 };
-
 export type MintNft = {
   $$type: "MintNft";
   body: Cell;
   amount: bigint;
   collection_address: Address;
+  refCode: bigint;
 };
 
 export function storeMintNft(src: MintNft) {
   return (builder: Builder) => {
     let b_0 = builder;
-    b_0.storeUint(1542219593, 32);
+    b_0.storeUint(1696451610, 32);
     b_0.storeRef(src.body);
     b_0.storeInt(src.amount, 257);
     b_0.storeAddress(src.collection_address);
+    b_0.storeInt(src.refCode, 257);
   };
 }

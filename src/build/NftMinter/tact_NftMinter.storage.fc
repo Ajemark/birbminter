@@ -71,16 +71,29 @@ cell $DeployOk$_store_cell((int) v) inline {
 
 ;;
 ;; Type: MintNft
-;; Header: 0x5bec6749
-;; TLB: mint_nft#5bec6749 body:^cell amount:int257 collection_address:address = MintNft
+;; Header: 0x651dcc1a
+;; TLB: mint_nft#651dcc1a body:^cell amount:int257 collection_address:address refCode:int257 = MintNft
 ;;
 
-(slice, ((cell, int, slice))) $MintNft$_load(slice sc_0) inline {
-    throw_unless(129, sc_0~load_uint(32) == 1542219593);
+(slice, ((cell, int, slice, int))) $MintNft$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 1696451610);
     var v'body = sc_0~load_ref();
     var v'amount = sc_0~load_int(257);
     var v'collection_address = sc_0~__tact_load_address();
-    return (sc_0, (v'body, v'amount, v'collection_address));
+    var v'refCode = sc_0~load_int(257);
+    return (sc_0, (v'body, v'amount, v'collection_address, v'refCode));
+}
+
+;;
+;; Type: ChangeContractOwner
+;; Header: 0x109287bc
+;; TLB: change_contract_owner#109287bc newOwner:address = ChangeContractOwner
+;;
+
+(slice, ((slice))) $ChangeContractOwner$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 278038460);
+    var v'newOwner = sc_0~__tact_load_address();
+    return (sc_0, (v'newOwner));
 }
 
 ;;
@@ -100,27 +113,37 @@ cell $DeployOk$_store_cell((int) v) inline {
 ;; Type: NftMinter
 ;;
 
-builder $NftMinter$_store(builder build_0, (slice, slice, int) v) inline {
-    var (v'owner, v'giveAwayAddress, v'isMinting) = v;
+builder $NftMinter$_store(builder build_0, (slice, slice, int, cell, cell, cell) v) inline {
+    var (v'owner, v'giveAwayAddress, v'isMinting, v'referral, v'referralAdd, v'referralCounts) = v;
     build_0 = __tact_store_address(build_0, v'owner);
     build_0 = __tact_store_address(build_0, v'giveAwayAddress);
     build_0 = build_0.store_int(v'isMinting, 1);
+    build_0 = build_0.store_dict(v'referral);
+    build_0 = build_0.store_dict(v'referralAdd);
+    var build_1 = begin_cell();
+    build_1 = build_1.store_dict(v'referralCounts);
+    build_0 = store_ref(build_0, build_1.end_cell());
     return build_0;
 }
 
-(slice, ((slice, slice, int))) $NftMinter$_load(slice sc_0) inline {
+(slice, ((slice, slice, int, cell, cell, cell))) $NftMinter$_load(slice sc_0) inline {
     var v'owner = sc_0~__tact_load_address();
     var v'giveAwayAddress = sc_0~__tact_load_address();
     var v'isMinting = sc_0~load_int(1);
-    return (sc_0, (v'owner, v'giveAwayAddress, v'isMinting));
+    var v'referral = sc_0~load_dict();
+    var v'referralAdd = sc_0~load_dict();
+    slice sc_1 = sc_0~load_ref().begin_parse();
+    var v'referralCounts = sc_1~load_dict();
+    return (sc_0, (v'owner, v'giveAwayAddress, v'isMinting, v'referral, v'referralAdd, v'referralCounts));
 }
 
-(slice, ((slice))) $NftMinter$init$_load(slice sc_0) inline {
+(slice, ((slice, slice))) $NftMinter$init$_load(slice sc_0) inline {
     var v'g_address = sc_0~__tact_load_address();
-    return (sc_0, (v'g_address));
+    var v'admin = sc_0~__tact_load_address();
+    return (sc_0, (v'g_address, v'admin));
 }
 
-(slice, slice, int) $NftMinter$_contract_load() impure inline_ref {
+(slice, slice, int, cell, cell, cell) $NftMinter$_contract_load() impure inline_ref {
     slice $sc = get_data().begin_parse();
     __tact_context_sys = $sc~load_ref();
     int $loaded = $sc~load_int(1);
@@ -129,13 +152,13 @@ builder $NftMinter$_store(builder build_0, (slice, slice, int) v) inline {
     } else {
         ;; Allow only workchain deployments
         throw_unless(137, my_address().preload_uint(11) == 1024);
-        (slice g_address) = $sc~$NftMinter$init$_load();
+        (slice g_address, slice admin) = $sc~$NftMinter$init$_load();
         $sc.end_parse();
-        return $NftMinter$_contract_init(g_address);
+        return $NftMinter$_contract_init(g_address, admin);
     }
 }
 
-() $NftMinter$_contract_store((slice, slice, int) v) impure inline {
+() $NftMinter$_contract_store((slice, slice, int, cell, cell, cell) v) impure inline {
     builder b = begin_cell();
     b = b.store_ref(__tact_context_sys);
     b = b.store_int(true, 1);
