@@ -226,7 +226,7 @@ export function DeployNfts() {
       const body = beginCell().store(storeMintNft(mess)).endCell();
 
       return {
-        address: "EQAEbR8KLw8qHaOru5wUZon-c-e3xEgvGuwhb-yQX6W9rLYq",
+        address: "EQDAJH6RrRtrDMPW5N5q7zPsVv8t1X3sIpDiVmAItQClmLF8",
         amount: !isGiveAway
           ? (toNano((6).toString()) + toNano("0.05")).toString()
           : toNano("0.05").toString(),
