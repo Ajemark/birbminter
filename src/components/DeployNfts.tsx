@@ -136,7 +136,7 @@ export function DeployNfts() {
 
   useEffect(() => {
     getRefData();
-  }, [tonConnectUI]);
+  }, [tonConnectUI, tonConnectUI.account, tonClient]);
 
   const mintContent = useMemo(() => {
     if (!count || count < 1) {
